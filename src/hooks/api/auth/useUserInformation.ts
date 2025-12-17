@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import { useLoginStore } from '@/store/useLoginStore'
 import type { UserInformation } from '@/types/api-response-types/auth-response-types'
 import api from '@/utils/axios'
@@ -13,7 +13,7 @@ export default function useUserInformation<T = UserInformation>(
     ...options,
     queryKey: ['info'],
     queryFn: async () => {
-      const response = await api.get(`${API_BASE_URL}/info/`)
+      const response = await api.get(`${MSW_BASE_URL}/info/`)
       const data = response.data
 
       return {

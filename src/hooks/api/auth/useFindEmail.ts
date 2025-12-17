@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UserFindEmail } from '@/types/api-request-types/auth-request-types'
 import api from '@/utils/axios'
@@ -17,7 +17,7 @@ export function useFindEmail(
     ...options,
     mutationKey: ['info', 'reset-password'],
     mutationFn: async ({ name, phoneNumber, verificationCode }) => {
-      const response = await api.post(`${API_BASE_URL}/info/find-email/`, {
+      const response = await api.post(`${MSW_BASE_URL}/info/find-email/`, {
         name: name,
         phone_number: formattedPhoneToE164KR(phoneNumber),
         code: verificationCode,

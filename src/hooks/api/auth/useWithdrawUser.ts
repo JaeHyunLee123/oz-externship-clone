@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import api from '@/utils/axios'
 import useToast from '@/hooks/useToast'
 import { useMutation } from '@tanstack/react-query'
@@ -16,12 +16,12 @@ export default function useWithdrawUser() {
   return useMutation<void, AxiosError, WithdrawalRequest>({
     mutationKey: ['user', 'withdraw'],
     mutationFn: async (payload) => {
-      return await api.delete(`${API_BASE_URL}/auth/withdraw`, {
+      return await api.delete(`${MSW_BASE_URL}/auth/withdraw`, {
         data: payload,
       })
     },
     onSuccess: async () => {
-      await api.post(`${API_BASE_URL}/auth/logout`)
+      await api.post(`${MSW_BASE_URL}/auth/logout`)
       triggerToast('success', '회원 탈퇴가 완료되었습니다 ✅')
       clearAccessToken()
       setIsLoggedIn(false)

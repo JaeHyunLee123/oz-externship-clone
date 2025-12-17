@@ -1,6 +1,6 @@
 import { useMutation, type UseMutationOptions } from '@tanstack/react-query'
 import api from '@/utils/axios'
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import type { AxiosError } from 'axios'
 import useToast from '@/hooks/useToast'
 import type { PasswordChangeFormType } from '@/schemas/form-schema/password-change-schema'
@@ -14,13 +14,13 @@ export default function useChangePassword(
     ...options,
     mutationKey: ['user'],
     mutationFn: async (payload) => {
-      const verifyResponse = await api.get(`${API_BASE_URL}/users/me`, {
+      const verifyResponse = await api.get(`${MSW_BASE_URL}/users/me`, {
         params: { password: payload.currentPassword },
       })
       if (verifyResponse.data !== payload.currentPassword) {
         throw new Error('현재 비밀번호가 올바르지 않습니다.')
       }
-      return api.put(`${API_BASE_URL}/user`, {
+      return api.put(`${MSW_BASE_URL}/user`, {
         password: payload.newPassword,
       })
     },

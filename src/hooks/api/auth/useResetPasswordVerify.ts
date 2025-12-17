@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UserResetPasswordVerify } from '@/types/api-request-types/auth-request-types'
 import api from '@/utils/axios'
@@ -14,7 +14,7 @@ export function useResetPasswordVerify(
     ...options,
     mutationKey: ['auth', 'reset-password', 'verify'],
     mutationFn: async ({ email, verificationCode }) => {
-      await api.post(`${API_BASE_URL}/auth/reset-password/verify`, {
+      await api.post(`${MSW_BASE_URL}/auth/reset-password/verify`, {
         email: email,
         verification_code: verificationCode,
       })

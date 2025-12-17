@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import { useToast } from '@/hooks'
 import { useLoginStore } from '@/store/useLoginStore'
 import type { UserKakaoLogin } from '@/types/api-request-types/auth-request-types'
@@ -23,7 +23,7 @@ export default function useKakaoCallback(
     ...options,
     mutationKey: ['auth', 'kakao', 'callback'],
     mutationFn: async ({ code }) => {
-      const response = await api.post(`${API_BASE_URL}/auth/kakao/callback`, {
+      const response = await api.post(`${MSW_BASE_URL}/auth/kakao/callback`, {
         code: code,
       })
       const newAccessToken = response.data.access_token

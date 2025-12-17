@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UserSignup } from '@/types/api-request-types/auth-request-types'
 import api from '@/utils/axios'
@@ -19,7 +19,7 @@ export default function useSignup(
       phoneVerificationCode,
       ...payload
     }) => {
-      await api.post(`${API_BASE_URL}/auth/email/signup`, {
+      await api.post(`${MSW_BASE_URL}/auth/email/signup`, {
         phone_number: phoneNumber,
         email_verification_code: emailVerificationCode,
         phone_verification_code: phoneVerificationCode,

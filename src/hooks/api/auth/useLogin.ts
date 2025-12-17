@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import { useToast } from '@/hooks'
 import { useLoginStore } from '@/store/useLoginStore'
 import type { UserLogin } from '@/types/api-request-types/auth-request-types'
@@ -25,7 +25,7 @@ export default function useLogin(
     mutationKey: ['auth', 'email', 'login'],
     mutationFn: async (payload) => {
       const response = await api.post(
-        `${API_BASE_URL}/auth/email/login`,
+        `${MSW_BASE_URL}/auth/email/login`,
         payload
       )
       const newAccessToken = response.data.access_token
