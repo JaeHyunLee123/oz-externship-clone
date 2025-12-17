@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UserRecoverVerifyBody } from '@/types/api-request-types/user-recover-request-types'
 import api from '@/utils/axios'
@@ -12,7 +12,7 @@ export default function useUserRecoverVerify(
 
   return useMutation({
     mutationFn: async ({ email, verificationCode }) => {
-      await api.post(`${API_BASE_URL}/auth/recover-account/verify`, {
+      await api.post(`${MSW_BASE_URL}/auth/recover-account/verify`, {
         email,
         verification_code: verificationCode,
       })

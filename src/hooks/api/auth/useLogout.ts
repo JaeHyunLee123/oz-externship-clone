@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import { useToast } from '@/hooks'
 import { useLoginStore } from '@/store/useLoginStore'
 import { clearAccessToken } from '@/utils'
@@ -19,7 +19,7 @@ export default function useLogout(options?: UseMutationOptions) {
   return useMutation({
     mutationKey: ['auth', 'logout'],
     mutationFn: async () => {
-      await api.post(`${API_BASE_URL}/auth/logout`)
+      await api.post(`${MSW_BASE_URL}/auth/logout`)
     },
     onSuccess: () => {
       setIsLoggedIn(false)

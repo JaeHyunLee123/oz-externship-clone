@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import { useToast } from '@/hooks'
 import { useLoginStore } from '@/store/useLoginStore'
 import type { UserNaverLogin } from '@/types/api-request-types/auth-request-types'
@@ -24,7 +24,7 @@ export default function useNaverCallback(
     ...options,
     mutationKey: ['auth', 'naver', 'callback'],
     mutationFn: async ({ code, state }) => {
-      const response = await api.post(`${API_BASE_URL}/auth/naver/callback`, {
+      const response = await api.post(`${MSW_BASE_URL}/auth/naver/callback`, {
         code: code,
         state: state,
       })

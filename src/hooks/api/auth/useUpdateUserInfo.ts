@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UpdateUserInfoRequest } from '@/types/api-request-types/auth-request-types'
 import api from '@/utils/axios'
@@ -16,7 +16,7 @@ export default function useUpdateUserInfo(
     ...options,
     mutationKey: ['user', 'update-info'],
     mutationFn: async ({ nickname, phoneNumber }) => {
-      return await api.put(`${API_BASE_URL}/users/me`, {
+      return await api.put(`${MSW_BASE_URL}/users/me`, {
         nickname,
         phone_number: phoneNumber,
       })

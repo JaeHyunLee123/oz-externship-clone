@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '@/constants/url-constants'
+import { MSW_BASE_URL } from '@/constants/url-constants'
 import useToast from '@/hooks/useToast'
 import type { UserResetPasswordSendCode } from '@/types/api-request-types/auth-request-types'
 import api from '@/utils/axios'
@@ -14,7 +14,7 @@ export function useResetPasswordSendCode(
     ...options,
     mutationKey: ['auth', 'reset-password', 'send'],
     mutationFn: async ({ email }) => {
-      await api.post(`${API_BASE_URL}/auth/reset-password/send`, {
+      await api.post(`${MSW_BASE_URL}/auth/reset-password/send`, {
         email: email,
       })
     },
