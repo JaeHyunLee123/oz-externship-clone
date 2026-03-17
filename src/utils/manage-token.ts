@@ -1,5 +1,5 @@
 export function getAccessToken() {
-  return localStorage.getItem('access_token')
+  return 'ajdfhsnbskgfln;mbdlvjsnkfsgl'
 }
 
 export function setAccessToken(token: string) {

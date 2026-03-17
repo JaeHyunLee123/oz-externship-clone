@@ -2,7 +2,6 @@ import {
   AuthContainer,
   AuthDescription,
   AuthLink,
-  AuthSocialLoginButton,
   AuthSubmitButton,
   AuthTitle,
 } from '@/components/auth/common'
@@ -28,8 +27,6 @@ import type { ModalContextValue } from '@/components/common/Modal'
 import { useState } from 'react'
 import { AxiosError } from 'axios'
 import { useWithdrawalDateStore } from '@/store'
-import { KAKAO_AUTH_URL, NAVER_AUTH_URL } from '@/constants/oauth-constants'
-import { createNaverState, setNaverState } from '@/utils/manage-naver-state'
 
 function Login() {
   const {
@@ -72,16 +69,6 @@ function Login() {
     }
   }
 
-  const handleKakaoLogin = () => {
-    window.location.href = KAKAO_AUTH_URL
-  }
-
-  const handleNaverLogin = () => {
-    const str = createNaverState()
-    setNaverState(str)
-    window.location.href = NAVER_AUTH_URL(str)
-  }
-
   return (
     <AuthContainer className="flex flex-col gap-10">
       <div className={InputFieldColStyle}>
@@ -92,12 +79,9 @@ function Login() {
         </div>
       </div>
 
-      <div className={InputGroupStyle}>
-        <AuthSocialLoginButton socialType="kakao" onClick={handleKakaoLogin} />
-        <AuthSocialLoginButton socialType="naver" onClick={handleNaverLogin} />
-      </div>
-
       <form className={InputGroupStyle} onSubmit={handleSubmit(onSubmit)}>
+        <span>MSW로 작동하는 로그인입니다.</span>
+        <span>아무 값만 입력하면 로그인됩니다.</span>
         <div className={InputFieldColStyle}>
           <Input
             {...register('email')}
