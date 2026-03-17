@@ -3,17 +3,16 @@ import { Input } from '@/components/common/input'
 import EmptyResultState from '@/components/common/state/EmptyResultState'
 import { BookmarkedRecruitmentCard } from '@/components/my-page'
 import BookmarkedLectureCard from '@/components/my-page/bookmarked-lecture/BookmarkedLectureCard'
-import { useWindowHeight, useWindowWidth } from '@/hooks'
+import { useWindowWidth, useObserver } from '@/hooks'
 import type { BookmarkedLectures } from '@/types/api-response-types/lecture-response-type'
 import type { BookmarkedRecruitments } from '@/types/api-response-types/recruitment-response-types'
-import { cn } from '@/utils'
 import type {
   InfiniteData,
   UseInfiniteQueryResult,
 } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { SearchIcon } from 'lucide-react'
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 const ENTIRE = '전체'
@@ -22,7 +21,6 @@ const LECTURE = '강의'
 
 const ESTIMATE_CARD_SIZE_PX = 260
 const OVER_SCAN = 3
-const FOOTER_SPACE = 1000 //완벽히 footer 사이즈에 맞춘게 아니고 적당히 보이게 설정
 
 type optionKey = 'entire' | 'lecture' | 'recruitment'
 type optionValue = typeof ENTIRE | typeof RECRUITMENT | typeof LECTURE
@@ -110,6 +108,29 @@ export default function BookmarkedContent({
 
   //버추얼리스트 스크롤 대상
   const parentRef = useRef<HTMLDivElement>(null)
+
+  const handleIntersect = useCallback(() => {
+    if (hasNextRecruitment && !isFetchingNextRecruitments) {
+      fetchNextRecruitments()
+    }
+    if (hasNextLecture && !isFetchingNextLectures) {
+      fetchNextLectures()
+    }
+  }, [
+    hasNextRecruitment,
+    hasNextLecture,
+    isFetchingNextRecruitments,
+    isFetchingNextLectures,
+    fetchNextRecruitments,
+    fetchNextLectures,
+  ])
+
+  // 무한 스크롤 옵저버 센서 부착용 훅
+  const observerRef = useObserver(handleIntersect, {
+    threshold: 0,
+    root: parentRef.current,
+  })
+
   //가상화 인스턴스
   const virtualizer = useVirtualizer({
     count: contents.length + additionalVirtualItemCount,
@@ -118,43 +139,6 @@ export default function BookmarkedContent({
     overscan: OVER_SCAN,
   })
 
-  //무한 스크롤 트리거
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse()
-
-    if (!lastItem) {
-      return
-    }
-
-    if (
-      lastItem.index >= contents.length - 1 &&
-      hasNextRecruitment &&
-      !isFetchingNextRecruitments
-    ) {
-      fetchNextRecruitments()
-    }
-
-    if (
-      lastItem.index >= contents.length - 1 &&
-      hasNextLecture &&
-      !isFetchingNextLectures
-    ) {
-      fetchNextLectures()
-    }
-  }, [
-    contents.length,
-    fetchNextLectures,
-    fetchNextRecruitments,
-    hasNextLecture,
-    hasNextRecruitment,
-    isFetchingNextLectures,
-    isFetchingNextRecruitments,
-    virtualizer,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    virtualizer.getVirtualItems(),
-  ])
-
-  const windowHeight = useWindowHeight()
   const windowWidth = useWindowWidth()
 
   const items = virtualizer.getVirtualItems()
@@ -211,8 +195,8 @@ export default function BookmarkedContent({
     selectedOption.startsWith(ENTIRE) || selectedOption.startsWith(LECTURE)
 
   return (
-    <div>
-      <header className="mb-6 flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+    <div className="flex h-full flex-col">
+      <header className="mb-6 flex w-full flex-shrink-0 flex-col items-center justify-between gap-2 lg:flex-row">
         <div className="w-full flex-col items-start justify-center gap-2">
           <h1 className="text-heading5 text-gray-900">북마크한 공고</h1>
           <span className="text-sm text-gray-600">
@@ -242,18 +226,15 @@ export default function BookmarkedContent({
         </div>
       </header>
       <main
-        className="overflow-y-auto"
+        className="flex-1 overflow-y-auto"
         ref={parentRef}
         style={{
-          height: `${windowHeight - FOOTER_SPACE}px`,
           width: `${(windowWidth * 7) / 10}px`,
         }}
       >
         <div
-          className={cn(
-            `h-[${virtualizer.getTotalSize()}px]`,
-            'relative w-full'
-          )}
+          className="relative w-full"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
         >
           <div
             style={{
@@ -271,13 +252,17 @@ export default function BookmarkedContent({
 
                 if (
                   isLoaderRow &&
-                  (isFetchingNextLectures || isFetchingNextRecruitments)
+                  (hasNextRecruitment || hasNextLecture)
                 ) {
                   return (
                     <div
                       key={virtualRow.key}
                       data-index={virtualRow.index}
-                      ref={virtualizer.measureElement}
+                      ref={(node) => {
+                        // virtualizer 측정용 ref와 observer 타겟용 ref 모두 연결
+                        virtualizer.measureElement(node)
+                        if (node) observerRef.current = node
+                      }}
                     >
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="mb-2">

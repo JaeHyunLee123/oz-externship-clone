@@ -11,7 +11,7 @@ export default function MyPageLayout() {
     <div className="flex flex-col items-center justify-start gap-8 p-8 md:flex-row md:items-start md:justify-center">
       {width < MD_WIDTH_PIXEL ? <MobileMyPageNavBar /> : <MyPageSideBar />}
 
-      <div className="min-h-[700px] max-w-4xl flex-1 rounded-lg border border-gray-200 bg-white p-8">
+      <div className="flex min-h-[700px] flex-1 flex-col rounded-lg border border-gray-200 bg-white p-8">
         <Outlet />
       </div>
     </div>

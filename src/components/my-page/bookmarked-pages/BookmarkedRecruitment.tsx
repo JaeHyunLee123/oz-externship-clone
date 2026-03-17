@@ -7,15 +7,14 @@ import type {
   UseInfiniteQueryResult,
 } from '@tanstack/react-query'
 import type { BookmarkedRecruitments } from '@/types/api-response-types/recruitment-response-types'
-import { useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { cn } from '@/utils'
-import { useWindowHeight } from '@/hooks'
 import EmptyResultState from '@/components/common/state/EmptyResultState'
+import { useObserver } from '@/hooks'
 
 const ESTIMATE_CARD_SIZE_PX = 260
 const OVER_SCAN = 3
-const FOOTER_SPACE = 500 //완벽히 footer 사이즈에 맞춘게 아니고 적당히 보이게 설정
+
 
 interface BookmarkedRecruitmentProps {
   bookmarkedRecruitmentInfinteQueryResult: UseInfiniteQueryResult<
@@ -34,12 +33,25 @@ export default function BookmarkedRecruitment({
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     bookmarkedRecruitmentInfinteQueryResult
 
-  const windowHeight = useWindowHeight()
+
 
   const recruitments = data ? data.pages.flatMap((page) => page.results) : []
 
   //버추얼리스트 스크롤 대상
   const parentRef = useRef<HTMLDivElement>(null)
+  
+  const handleIntersect = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  // 무한 스크롤 옵저버 센서 부착용 훅
+  const observerRef = useObserver(handleIntersect, {
+    threshold: 0,
+    root: parentRef.current,
+  })
+
   //가상화 인스턴스
   const virtualizer = useVirtualizer({
     count: hasNextPage ? recruitments.length + 1 : recruitments.length,
@@ -48,35 +60,10 @@ export default function BookmarkedRecruitment({
     overscan: OVER_SCAN,
   })
 
-  //무한 스크롤 트리거
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse()
-
-    if (!lastItem) {
-      return
-    }
-
-    if (
-      lastItem.index >= recruitments.length - 1 &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage()
-    }
-  }, [
-    recruitments.length,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    virtualizer,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    virtualizer.getVirtualItems(),
-  ])
-
   const items = virtualizer.getVirtualItems()
   return (
-    <div>
-      <header className="mb-6 flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+    <div className="flex h-full flex-col max-h-[1500px]">
+      <header className="mb-6 flex w-full flex-shrink-0 flex-col items-center justify-between gap-2 lg:flex-row">
         <div className="flex w-full flex-col items-start justify-center gap-2 lg:w-auto">
           <h1 className="text-heading3 text-gray-900">북마크한 공고</h1>
           <span className="text-gray-600">
@@ -94,16 +81,10 @@ export default function BookmarkedRecruitment({
           />
         </div>
       </header>
-      <main
-        className="overflow-y-auto"
-        ref={parentRef}
-        style={{ height: `${windowHeight - FOOTER_SPACE}px` }}
-      >
+      <main className="flex-1 overflow-y-auto" ref={parentRef}>
         <div
-          className={cn(
-            `h-[${virtualizer.getTotalSize()}px]`,
-            'relative w-full'
-          )}
+          className="relative w-full"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
         >
           <div
             style={{
@@ -119,12 +100,16 @@ export default function BookmarkedRecruitment({
                 const isLoaderRow = virtualRow.index > recruitments.length - 1
                 const recruitment = recruitments[virtualRow.index]
 
-                if (isLoaderRow && isFetchingNextPage) {
+                if (isLoaderRow && hasNextPage) {
                   return (
                     <div
                       key={virtualRow.key}
                       data-index={virtualRow.index}
-                      ref={virtualizer.measureElement}
+                      ref={(node) => {
+                        // virtualizer 측정용 ref와 observer 타겟용 ref 모두 연결
+                        virtualizer.measureElement(node)
+                        if (node) observerRef.current = node
+                      }}
                     >
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="mb-2">
