@@ -10,12 +10,11 @@ import type { BookmarkedRecruitments } from '@/types/api-response-types/recruitm
 import { useEffect, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { cn } from '@/utils'
-import { useWindowHeight } from '@/hooks'
 import EmptyResultState from '@/components/common/state/EmptyResultState'
 
 const ESTIMATE_CARD_SIZE_PX = 260
 const OVER_SCAN = 3
-const FOOTER_SPACE = 500 //완벽히 footer 사이즈에 맞춘게 아니고 적당히 보이게 설정
+
 
 interface BookmarkedRecruitmentProps {
   bookmarkedRecruitmentInfinteQueryResult: UseInfiniteQueryResult<
@@ -34,7 +33,7 @@ export default function BookmarkedRecruitment({
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     bookmarkedRecruitmentInfinteQueryResult
 
-  const windowHeight = useWindowHeight()
+
 
   const recruitments = data ? data.pages.flatMap((page) => page.results) : []
 
@@ -75,8 +74,8 @@ export default function BookmarkedRecruitment({
 
   const items = virtualizer.getVirtualItems()
   return (
-    <div>
-      <header className="mb-6 flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+    <div className="flex h-full flex-col max-h-[1500px]">
+      <header className="mb-6 flex w-full flex-shrink-0 flex-col items-center justify-between gap-2 lg:flex-row">
         <div className="flex w-full flex-col items-start justify-center gap-2 lg:w-auto">
           <h1 className="text-heading3 text-gray-900">북마크한 공고</h1>
           <span className="text-gray-600">
@@ -94,16 +93,10 @@ export default function BookmarkedRecruitment({
           />
         </div>
       </header>
-      <main
-        className="overflow-y-auto"
-        ref={parentRef}
-        style={{ height: `${windowHeight - FOOTER_SPACE}px` }}
-      >
+      <main className="flex-1 overflow-y-auto" ref={parentRef}>
         <div
-          className={cn(
-            `h-[${virtualizer.getTotalSize()}px]`,
-            'relative w-full'
-          )}
+          className="relative w-full"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
         >
           <div
             style={{

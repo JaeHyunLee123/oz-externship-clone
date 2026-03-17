@@ -3,10 +3,9 @@ import { Input } from '@/components/common/input'
 import EmptyResultState from '@/components/common/state/EmptyResultState'
 import { BookmarkedRecruitmentCard } from '@/components/my-page'
 import BookmarkedLectureCard from '@/components/my-page/bookmarked-lecture/BookmarkedLectureCard'
-import { useWindowHeight, useWindowWidth } from '@/hooks'
+import { useWindowWidth } from '@/hooks'
 import type { BookmarkedLectures } from '@/types/api-response-types/lecture-response-type'
 import type { BookmarkedRecruitments } from '@/types/api-response-types/recruitment-response-types'
-import { cn } from '@/utils'
 import type {
   InfiniteData,
   UseInfiniteQueryResult,
@@ -22,7 +21,6 @@ const LECTURE = '강의'
 
 const ESTIMATE_CARD_SIZE_PX = 260
 const OVER_SCAN = 3
-const FOOTER_SPACE = 1000 //완벽히 footer 사이즈에 맞춘게 아니고 적당히 보이게 설정
 
 type optionKey = 'entire' | 'lecture' | 'recruitment'
 type optionValue = typeof ENTIRE | typeof RECRUITMENT | typeof LECTURE
@@ -154,7 +152,6 @@ export default function BookmarkedContent({
     virtualizer.getVirtualItems(),
   ])
 
-  const windowHeight = useWindowHeight()
   const windowWidth = useWindowWidth()
 
   const items = virtualizer.getVirtualItems()
@@ -211,8 +208,8 @@ export default function BookmarkedContent({
     selectedOption.startsWith(ENTIRE) || selectedOption.startsWith(LECTURE)
 
   return (
-    <div>
-      <header className="mb-6 flex w-full flex-col items-center justify-between gap-2 lg:flex-row">
+    <div className="flex h-full flex-col">
+      <header className="mb-6 flex w-full flex-shrink-0 flex-col items-center justify-between gap-2 lg:flex-row">
         <div className="w-full flex-col items-start justify-center gap-2">
           <h1 className="text-heading5 text-gray-900">북마크한 공고</h1>
           <span className="text-sm text-gray-600">
@@ -242,18 +239,15 @@ export default function BookmarkedContent({
         </div>
       </header>
       <main
-        className="overflow-y-auto"
+        className="flex-1 overflow-y-auto"
         ref={parentRef}
         style={{
-          height: `${windowHeight - FOOTER_SPACE}px`,
           width: `${(windowWidth * 7) / 10}px`,
         }}
       >
         <div
-          className={cn(
-            `h-[${virtualizer.getTotalSize()}px]`,
-            'relative w-full'
-          )}
+          className="relative w-full"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
         >
           <div
             style={{

@@ -2,9 +2,7 @@ import { ListItemSkeleton } from '@/components'
 import { Input } from '@/components/common/input'
 import EmptyResultState from '@/components/common/state/EmptyResultState'
 import BookmarkedLectureCard from '@/components/my-page/bookmarked-lecture/BookmarkedLectureCard'
-import { useWindowHeight } from '@/hooks'
 import type { BookmarkedLectures } from '@/types/api-response-types/lecture-response-type'
-import { cn } from '@/utils'
 import type {
   InfiniteData,
   UseInfiniteQueryResult,
@@ -14,8 +12,7 @@ import { SearchIcon } from 'lucide-react'
 import { useEffect, useRef } from 'react'
 
 const ESTIMATE_CARD_SIZE_PX = 260
-const OVER_SCAN = 3
-const FOOTER_SPACE = 500 //완벽히 footer 사이즈에 맞춘게 아니고 적당히 보이게 설정
+
 
 interface BookmarkedLectureProps {
   bookmarkedLecturesInfiniteQueryResult: UseInfiniteQueryResult<
@@ -35,7 +32,7 @@ export default function BookmarkedLecture({
   const { data, isFetchingNextPage, fetchNextPage, hasNextPage } =
     bookmarkedLecturesInfiniteQueryResult
 
-  const windowHeight = useWindowHeight()
+
 
   const lectures = data ? data.pages.flatMap((page) => page.results) : []
 
@@ -46,7 +43,7 @@ export default function BookmarkedLecture({
     count: hasNextPage ? lectures.length + 1 : lectures.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => ESTIMATE_CARD_SIZE_PX,
-    overscan: OVER_SCAN,
+    overscan: 5,
   })
 
   //무한 스크롤 트리거
@@ -76,7 +73,7 @@ export default function BookmarkedLecture({
 
   const items = virtualizer.getVirtualItems()
   return (
-    <div>
+    <div className="flex h-full flex-col max-h-[1500px]">
       <header className="mb-6 flex flex-col items-center justify-between gap-2 lg:flex-row">
         <div className="flex w-full flex-col gap-2 lg:w-auto">
           <h1 className="text-heading3 text-gray-900">북마크한 강의</h1>
@@ -94,16 +91,10 @@ export default function BookmarkedLecture({
           />
         </div>
       </header>
-      <main
-        className="overflow-y-auto"
-        ref={parentRef}
-        style={{ height: `${windowHeight - FOOTER_SPACE}px` }}
-      >
+      <main className="flex-1 overflow-y-auto " ref={parentRef}>
         <div
-          className={cn(
-            `h-[${virtualizer.getTotalSize()}px]`,
-            'relative w-full'
-          )}
+          className="relative w-full"
+          style={{ height: `${virtualizer.getTotalSize()}px` }}
         >
           <div
             style={{
