@@ -9,7 +9,8 @@ import type {
 } from '@tanstack/react-query'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { SearchIcon } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import { useCallback, useRef } from 'react'
+import { useObserver } from '@/hooks'
 
 const ESTIMATE_CARD_SIZE_PX = 260
 
@@ -38,6 +39,19 @@ export default function BookmarkedLecture({
 
   //버추얼리스트 스크롤 대상
   const parentRef = useRef<HTMLDivElement>(null)
+
+  const handleIntersect = useCallback(() => {
+    if (hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage, isFetchingNextPage])
+
+  // 무한 스크롤 옵저버 센서 부착용 훅
+  const observerRef = useObserver(handleIntersect, {
+    threshold: 0,
+    root: parentRef.current,
+  })
+
   //가상화 인스턴스
   const virtualizer = useVirtualizer({
     count: hasNextPage ? lectures.length + 1 : lectures.length,
@@ -45,31 +59,6 @@ export default function BookmarkedLecture({
     estimateSize: () => ESTIMATE_CARD_SIZE_PX,
     overscan: 5,
   })
-
-  //무한 스크롤 트리거
-  useEffect(() => {
-    const [lastItem] = [...virtualizer.getVirtualItems()].reverse()
-
-    if (!lastItem) {
-      return
-    }
-
-    if (
-      lastItem.index >= lectures.length - 1 &&
-      hasNextPage &&
-      !isFetchingNextPage
-    ) {
-      fetchNextPage()
-    }
-  }, [
-    lectures.length,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    virtualizer,
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    virtualizer.getVirtualItems(),
-  ])
 
   const items = virtualizer.getVirtualItems()
   return (
@@ -110,12 +99,16 @@ export default function BookmarkedLecture({
                 const isLoaderRow = virtualRow.index > lectures.length - 1
                 const lecture = lectures[virtualRow.index]
 
-                if (isLoaderRow && isFetchingNextPage) {
+                if (isLoaderRow && hasNextPage) {
                   return (
                     <div
                       key={virtualRow.key}
                       data-index={virtualRow.index}
-                      ref={virtualizer.measureElement}
+                      ref={(node) => {
+                        // virtualizer 측정용 ref와 observer 타겟용 ref 모두 연결
+                        virtualizer.measureElement(node)
+                        if (node) observerRef.current = node
+                      }}
                     >
                       {[...Array(5)].map((_, i) => (
                         <div key={i} className="mb-2">
